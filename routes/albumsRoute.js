@@ -23,7 +23,7 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const album = await Album.findById(id);
+    const album = await Album.findById(id).populate('musician', 'artName -_id');
     if (!album) {
       res.status(404).send("Not Found");
     } else {
