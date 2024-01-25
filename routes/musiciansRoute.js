@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const musicians = await Musician.find();
+    const musicians = await Musician.find().populate("albums", "title");
     res.send(musicians);
   } catch (err) {
     console.error(err);
@@ -22,8 +22,8 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
     const musician = await Musician.findById(id).populate("albums", "title");
     if (!musician) {
       res.status(404).send("Not Found");
@@ -36,13 +36,13 @@ router.get("/:id", async (req, res) => {
 });
 
 router.patch("/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const musician = await Musician.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-      context: "query",
+    const musician = await Musician.findById(id);
+    Object.entries(req.body).forEach(([key, value]) => {
+      musician[key] = value;
     });
+    await musician.save();
     res.send(musician);
   } catch (err) {
     res.status(404).send(err.message);
@@ -53,7 +53,10 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const musician = await Musician.findById(id);
-    await musician.removeFromAlbums();
+    if (musician.albums) {
+      await musician.removeFromAlbums();
+    }
+
     await Musician.findByIdAndDelete(id);
     res.send(`Musician with id ${id} deleted successfully`);
   } catch (err) {
