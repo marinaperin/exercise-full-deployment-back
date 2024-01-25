@@ -4,7 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
-const { MONGODB_URI } = process.env;
+const { MONGO_URI } = process.env;
 const PORT = process.env.PORT || 3000;
 import albumsRoute from "./routes/albumsRoute.js";
 import musiciansRoute from "./routes/musiciansRoute.js";
@@ -19,7 +19,7 @@ app.use("/albums", albumsRoute);
 app.use("/musicians", musiciansRoute);
 
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGO_URI)
   .then(() => {
     console.log("Connected to Mongo successfully");
     app.listen(PORT, () => {

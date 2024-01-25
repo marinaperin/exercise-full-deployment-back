@@ -7,7 +7,8 @@ router.get("/", async (req, res) => {
     const musicians = await Musician.find();
     res.send(musicians);
   } catch (err) {
-    res.status(500).send(err.message);
+    console.error(err);
+    res.status(500).send("Server Error");
   }
 });
 
@@ -23,7 +24,7 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const musician = await Musician.findById(id).populate('albums', 'title -_id');
+    const musician = await Musician.findById(id).populate("albums", "title");
     if (!musician) {
       res.status(404).send("Not Found");
     } else {
@@ -49,8 +50,10 @@ router.patch("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params;
+    const musician = await Musician.findById(id);
+    await musician.removeFromAlbums();
     await Musician.findByIdAndDelete(id);
     res.send(`Musician with id ${id} deleted successfully`);
   } catch (err) {
