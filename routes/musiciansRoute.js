@@ -2,9 +2,13 @@ import express from "express";
 import Musician from "../models/musicianModel.js";
 const router = express.Router();
 
+const sortName = "art_name" ? "art_name" : "last_name";
+
 router.get("/", async (req, res) => {
   try {
-    const musicians = await Musician.find().populate("albums", "title");
+    const musicians = await Musician.find()
+      .sort({ sortName: 1 })
+      .populate("albums", "title");
     res.send(musicians);
   } catch (err) {
     console.error(err);

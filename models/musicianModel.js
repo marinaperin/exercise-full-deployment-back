@@ -20,6 +20,11 @@ const schema = new Schema(
       ref: "Album",
     },
     poster: String,
+    debut_year: Number,
+    agency: String,
+    country: String,
+    band: String,
+    members_number: Number,
     /* slug: {
       type: String,
       trim: true,
@@ -39,7 +44,13 @@ const schema = new Schema(
 
 schema.pre("save", async function (next) {
   const Musician = this.constructor;
-
+  if (this.isModified("albums")) {
+    const oldMusicianId = this._id.toString();
+    const oldMusician = await Musician.findById(oldMusicianId);
+    if (oldMusician) {
+      this.oldMusician = oldMusician.albums.map((a) => a._id.toString());
+    }
+  }
   next();
 });
 
@@ -61,6 +72,7 @@ schema.post("save", async function (doc, next) {
         const album = await Album.findById(newAlbumId);
         if (album) {
           await album.changeMusician(_id);
+          console.log(`Musician added to Album ${newAlbumId}`);
         }
       }
     });
@@ -94,7 +106,7 @@ schema.methods.removeAlbum = async function (albumId) {
     albumsIds.splice(albumsIds.indexOf(albumId), 1);
     await Musician.findByIdAndUpdate(this._id, { albums: albumsIds });
     console.log(
-      `Album removed from Musician ${this.first_name} ${this.last_name}`
+      `Album removed from Musician ${art_name ? art_name : this.first_name + ' ' + this.last_name}`
     );
   }
 };
@@ -105,7 +117,7 @@ schema.methods.addAlbum = async function (albumId) {
     albumsIds.push(albumId);
     await Musician.findByIdAndUpdate(this._id, { albums: albumsIds });
     console.log(
-      `New album added to Musician ${this.first_name} ${this.last_name}`
+      `New album added to Musician ${art_name ? art_name : this.first_name + ' ' + this.last_name}`
     );
   }
 };

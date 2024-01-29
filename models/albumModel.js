@@ -17,6 +17,9 @@ const schema = new Schema(
       required: true,
     },
     poster: String,
+    songs: [String],
+    duration_seconds: Number,
+
     /*  slug: {
       type: String,
       trim: true,
@@ -83,7 +86,10 @@ schema.post("save", async function (doc, next) {
 
 schema.methods.changeMusician = async function (musicianId) {
   const Album = this.constructor;
+  const oldMusician = await Musician.findById(this.musician);
+  oldMusician.removeAlbum(this._id);
   await Album.findByIdAndUpdate(this._id, { musician: musicianId });
+  
 };
 
 schema.methods.removeFromMusician = async function () {

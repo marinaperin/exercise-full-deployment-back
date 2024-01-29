@@ -1,13 +1,13 @@
 import Album from "../models/albumModel.js";
+import Musician from "../models/musicianModel.js";
 import express from "express";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const albums = await Album.find().populate(
-      "musician",
-      "art_name first_name last_name"
-    );
+    const albums = await Album.find()
+      .sort({ year: -1 })
+      .populate("musician", "art_name first_name last_name");
     res.send(albums);
   } catch (err) {
     console.error(err);
